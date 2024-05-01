@@ -30,7 +30,7 @@ jobs:
             os-cmake-args: '-DLLVM_BUILD_STATIC=ON -Thost=x64 -DCMAKE_CXX_FLAGS="/MP" -DLLVM_USE_CRT_RELEASE="MT"'
             build-args: '--config Release --parallel'
             extension: '.exe'
-            bindir: '/Release/bin'
+            bindir: '\\Release\\bin'
             shacmd: 'sha512sum.exe'
     runs-on: ${{ matrix.runner }}
     env:
@@ -79,7 +79,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clang-tools
-        path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-*"
+        path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-(tidy|format)*"
         retention-days: 1
         
   draft-release:
