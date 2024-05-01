@@ -7,12 +7,13 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ macosx, windows ]
+        os: [ linux, macosx, windows ]
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
