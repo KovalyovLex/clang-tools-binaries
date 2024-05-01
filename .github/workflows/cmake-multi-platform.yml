@@ -16,21 +16,21 @@ jobs:
             os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DLLVM_PARALLEL_LINK_JOBS=2 ${POSIX_CMAKE_ARGS}'
             build-args: '--parallel 4'
             extension: ''
-            bindir: '/bin'
+            bindir: 'bin'
             shacmd: 'sha512sum'
           - os: macosx
             runner: macos-latest
             os-cmake-args: '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DLLVM_PARALLEL_LINK_JOBS=2 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 ${POSIX_CMAKE_ARGS}'
             build-args: '--parallel 4'
             extension: ''
-            bindir: '/bin'
+            bindir: 'bin'
             shacmd: 'shasum -a512'
           - os: windows
             runner: windows-latest
             os-cmake-args: '-DLLVM_BUILD_STATIC=ON -Thost=x64 -DCMAKE_CXX_FLAGS="/MP" -DLLVM_USE_CRT_RELEASE="MT"'
             build-args: '--config Release --parallel'
             extension: '.exe'
-            bindir: '\\Release\\bin'
+            bindir: 'Release/bin'
             shacmd: 'sha512sum.exe'
     runs-on: ${{ matrix.runner }}
     env:
@@ -51,6 +51,8 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "artifacts-dir=${{ github.workspace }}/artifacts" >> "$GITHUB_OUTPUT"
+        echo "bin-dir=${{ github.workspace }}/build/${{ matrix.bindir }}" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -63,23 +65,38 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-format
     
     - name: Build (clang-tidy)
+      if: false
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-tidy
 
-    - name: Create and Print sha512sum
+    - name: Copy binaries
+      working-directory: ${{ steps.strings.outputs.bin-dir }}
       shell: bash
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}
+        cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
+        cp ./clang-tidy${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
+
+    - name: Create and Print sha512sum (clang-format)
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
+      shell: bash
+      run: |
         ${{ matrix.shacmd }} clang-format${{ matrix.extension }} > clang-format${{ matrix.extension }}.sha512sum
-        ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
-        echo "Checksums are: "
+        echo "Checksum: "
         cat clang-format${{ matrix.extension }}.sha512sum
+    
+    - name: Create and Print sha512sum (clang-tidy)
+      if: false
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
+      shell: bash
+      run: |
+        ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
+        echo "Checksum: "
         cat clang-tidy${{ matrix.extension }}.sha512sum
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: clang-tools
-        path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-{format,tidy}*"
+        path: "${{ steps.strings.outputs.artifacts-dir }}"
         retention-days: 1
         
   draft-release:
