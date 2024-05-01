@@ -50,9 +50,9 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build"  | sed 's|\|/|g' >> "$GITHUB_OUTPUT"
-        echo "artifacts-dir=${{ github.workspace }}/artifacts" | sed 's|\|/|g' >> "$GITHUB_OUTPUT"
-        echo "bin-dir=${{ github.workspace }}/build/${{ matrix.bindir }}" | sed 's|\|/|g' >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ github.workspace }}/build"  | sed 's|\\|\/|g' >> "$GITHUB_OUTPUT"
+        echo "artifacts-dir=${{ github.workspace }}/artifacts" | sed 's|\\|\/|g' >> "$GITHUB_OUTPUT"
+        echo "bin-dir=${{ github.workspace }}/build/${{ matrix.bindir }}" | sed 's|\\|\/|g' >> "$GITHUB_OUTPUT"
 
         mkdir ${{ github.workspace }}/artifacts
 
