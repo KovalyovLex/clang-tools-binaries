@@ -55,6 +55,11 @@ jobs:
         echo "bin-dir=${{ github.workspace }}/build/${{ matrix.bindir }}" | sed 's|\\|\/|g' >> "$GITHUB_OUTPUT"
 
         mkdir ${{ github.workspace }}/artifacts
+    
+    - name: Create artifacts dir
+      shell: bash
+      run: |
+        mkdir ${{ steps.strings.outputs.artifacts-dir }}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -75,9 +80,8 @@ jobs:
       shell: bash
       run: |
         cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
-        cp ./clang-tidy${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
 
-    - name: Create and Print sha512sum (clang-format)
+    - name: Create and print sha512sum (clang-format)
       working-directory: ${{ steps.strings.outputs.artifacts-dir }}
       shell: bash
       run: |
@@ -85,7 +89,7 @@ jobs:
         echo "Checksum: "
         cat clang-format${{ matrix.extension }}.sha512sum
     
-    - name: Create and Print sha512sum (clang-tidy)
+    - name: Create and print sha512sum (clang-tidy)
       if: false
       working-directory: ${{ steps.strings.outputs.artifacts-dir }}
       shell: bash
