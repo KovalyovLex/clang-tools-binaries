@@ -13,7 +13,7 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
             build-args: '-j2'
             extension: ''
             bindir: '/bin'
@@ -27,14 +27,14 @@ jobs:
             shacmd: 'shasum -a512'
           - os: windows
             runner: windows-latest
-            os-cmake-args: '-Thost=x64 -DCMAKE_CXX_FLAGS="/MP" -DLLVM_USE_CRT_RELEASE="MT"'
+            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -Thost=x64 -DCMAKE_CXX_FLAGS="/MP" -DLLVM_USE_CRT_RELEASE="MT"'
             build-args: '--config Release'
             extension: '.exe'
             bindir: '/Release/bin'
             shacmd: 'sha512sum.exe'
     runs-on: ${{ matrix.runner }}
     env:
-      COMMON_CMAKE_ARGS: '-DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
+      COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
       POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'
       LLVM_VERSION: '18.1.4'
     steps:
