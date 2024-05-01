@@ -45,6 +45,13 @@ jobs:
       run: |
           git clone -b "llvmorg-${{ env.LLVM_VERSION }}" --depth=1 https://github.com/llvm/llvm-project "llvm"
 
+    - name: Install Clang 18
+      if: ${{ matrix.runner }} == linux
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x ./llvm.sh
+        sudo ./llvm.sh 18
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
