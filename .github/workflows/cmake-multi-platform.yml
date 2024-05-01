@@ -1,4 +1,4 @@
-name: CMake on multiple platforms
+name: Build binaries
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_FLAGS="-s -flto" ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_FLAGS="-s -flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     env:
       COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
-      POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10'
+      POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=MinSizeRel'
       LLVM_VERSION: '18.1.4'
     steps:
     - name: Checkout
@@ -54,7 +54,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       run: >
-        cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}
+        cmake -S ${{ github.workspace }}/llvm/llvm -B ${{ steps.strings.outputs.build-output-dir }}
         ${{ env.COMMON_CMAKE_ARGS }}
         ${{ matrix.os-cmake-args }}
     
@@ -65,13 +65,13 @@ jobs:
       shell: bash
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}
-        ${{ matrix.shacmd }} clang-format${{ matrix.dotexe }} > clang-format${{ matrix.dotexe }}.sha512sum
-        ${{ matrix.shacmd }} clang-query${{ matrix.dotexe }} > clang-query${{ matrix.dotexe }}.sha512sum
-        ${{ matrix.shacmd }} clang-tidy${{ matrix.dotexe }} > clang-tidy${{ matrix.dotexe }}.sha512sum
+        ${{ matrix.shacmd }} clang-format${{ matrix.extension }} > clang-format${{ matrix.extension }}.sha512sum
+        ${{ matrix.shacmd }} clang-query${{ matrix.extension }} > clang-query${{ matrix.extension }}.sha512sum
+        ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
         echo "Checksums are: "
-        cat clang-format${{ matrix.dotexe }}.sha512sum
-        cat clang-query${{ matrix.dotexe }}.sha512sum
-        cat clang-tidy${{ matrix.dotexe }}.sha512sum
+        cat clang-format${{ matrix.extension }}.sha512sum
+        cat clang-query${{ matrix.extension }}.sha512sum
+        cat clang-tidy${{ matrix.extension }}.sha512sum
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
