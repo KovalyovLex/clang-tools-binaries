@@ -13,22 +13,22 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
-            build-args: '-j2'
+            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DLLVM_PARALLEL_LINK_JOBS=2 ${POSIX_CMAKE_ARGS}'
+            build-args: '--parallel 2'
             extension: ''
             bindir: '/bin'
             shacmd: 'sha512sum'
           - os: macosx
             runner: macos-latest
             os-cmake-args: '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 ${POSIX_CMAKE_ARGS}'
-            build-args: ''
+            build-args: '--parallel'
             extension: ''
             bindir: '/bin'
             shacmd: 'shasum -a512'
           - os: windows
             runner: windows-latest
             os-cmake-args: '-DLLVM_BUILD_STATIC=ON -Thost=x64 -DCMAKE_CXX_FLAGS="/MP" -DLLVM_USE_CRT_RELEASE="MT"'
-            build-args: '--config Release'
+            build-args: '--config Release --parallel'
             extension: '.exe'
             bindir: '/Release/bin'
             shacmd: 'sha512sum.exe'
@@ -60,10 +60,10 @@ jobs:
         ${{ matrix.os-cmake-args }}
     
     - name: Build (clang-format)
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --parallel --target clang-format
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-format
     
     - name: Build (clang-tidy)
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --parallel --target clang-tidy
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-tidy
 
     - name: Create and Print sha512sum
       shell: bash
