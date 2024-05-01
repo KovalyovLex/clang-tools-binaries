@@ -21,7 +21,7 @@ jobs:
           - os: macosx
             runner: macos-latest
             os-cmake-args: '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DLLVM_PARALLEL_LINK_JOBS=2 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 ${POSIX_CMAKE_ARGS}'
-            build-args: '--parallel'
+            build-args: '--parallel 4'
             extension: ''
             bindir: '/bin'
             shacmd: 'shasum -a512'
