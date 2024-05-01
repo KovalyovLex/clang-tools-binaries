@@ -13,7 +13,7 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=clang++-18 -DCMAKE_C_COMPILER=clang-18 ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=clang++-18 -DCMAKE_C_COMPILER=clang-18 -DLLVM_USE_LINKER=lld ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
