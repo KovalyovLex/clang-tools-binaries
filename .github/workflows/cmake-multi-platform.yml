@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ linux, macosx, windows ]
         include:
-         - os: linux
+          - os: linux
             runner: ubuntu-latest
             os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_FLAGS="-s -flto" ${POSIX_CMAKE_ARGS}'
             build-args: ''
@@ -41,8 +41,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Checkout LLVM repo
-      - uses: actions/checkout@v4
-      - run: |
+      run: |
           git clone -b "llvmorg-${{ env.LLVM_VERSION }}" --depth=1 https://github.com/llvm/llvm-project "llvm"
 
     - name: Set reusable strings
