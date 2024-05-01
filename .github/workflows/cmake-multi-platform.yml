@@ -34,7 +34,7 @@ jobs:
             shacmd: 'sha512sum.exe'
     runs-on: ${{ matrix.runner }}
     env:
-      COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
+      COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
       POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'
       LLVM_VERSION: '18.1.4'
     steps:
