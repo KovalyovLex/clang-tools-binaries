@@ -58,6 +58,7 @@ jobs:
       shell: bash
       run: |
         mkdir ${{ steps.strings.outputs.artifacts-dir }}
+        mkdir ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -70,17 +71,17 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-format
     
     - name: Build (clang-tidy)
-      if: false
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-tidy
 
     - name: Copy binaries
       working-directory: ${{ steps.strings.outputs.bin-dir }}
       shell: bash
       run: |
-        cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
+        cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
+        cp ./clang-tidy${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
 
     - name: Create and print sha512sum (clang-format)
-      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
       shell: bash
       run: |
         ${{ matrix.shacmd }} clang-format${{ matrix.extension }} > clang-format${{ matrix.extension }}.sha512sum
@@ -88,8 +89,7 @@ jobs:
         cat clang-format${{ matrix.extension }}.sha512sum
     
     - name: Create and print sha512sum (clang-tidy)
-      if: false
-      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
       shell: bash
       run: |
         ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
