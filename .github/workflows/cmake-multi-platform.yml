@@ -79,7 +79,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clang-tools
-        path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-(tidy|format)*"
+        path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-{format,tidy}*"
         retention-days: 1
         
   draft-release:
