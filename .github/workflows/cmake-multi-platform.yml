@@ -79,11 +79,9 @@ jobs:
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}
         ${{ matrix.shacmd }} clang-format${{ matrix.extension }} > clang-format${{ matrix.extension }}.sha512sum
-        ${{ matrix.shacmd }} clang-query${{ matrix.extension }} > clang-query${{ matrix.extension }}.sha512sum
         ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
         echo "Checksums are: "
         cat clang-format${{ matrix.extension }}.sha512sum
-        cat clang-query${{ matrix.extension }}.sha512sum
         cat clang-tidy${{ matrix.extension }}.sha512sum
     
     - name: Upload artifacts
