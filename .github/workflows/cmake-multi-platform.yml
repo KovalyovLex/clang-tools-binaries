@@ -8,11 +8,11 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ linux, macosx, windows ]
+        os: [ macosx, windows ]
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DLLVM_BUILD_STATIC=ON -DCMAKE_CXX_FLAGS="-s -flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
