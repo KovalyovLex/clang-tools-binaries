@@ -14,7 +14,7 @@ jobs:
           - os: linux
             runner: ubuntu-latest
             os-cmake-args: '-DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
-            build-args: ''
+            build-args: '-j2'
             extension: ''
             bindir: '/bin'
             shacmd: 'sha512sum'
