@@ -13,14 +13,14 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
             shacmd: 'sha512sum'
           - os: macosx
             runner: macos-latest
-            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
