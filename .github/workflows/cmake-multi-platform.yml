@@ -77,9 +77,31 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: clang-tools-${{ env.LLVM_VERSION }}-${{matrix.os}}
+        name: clang-tools
         path: "${{ steps.strings.outputs.build-output-dir }}${{ matrix.bindir }}/clang-*"
         retention-days: 1
         
+  draft-release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      always() && 
+      needs.build.result == 'success'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: clang-tools
+
+      - name: List Files
+        run: ls -laR .
+
+      - name: Make Draft Release
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "clang-*"
+          draft: true
 
         
