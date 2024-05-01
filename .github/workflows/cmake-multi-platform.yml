@@ -13,7 +13,7 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=clang++-18 -DCMAKE_C_COMPILER=clang-18 -DLLVM_USE_LINKER=lld ${POSIX_CMAKE_ARGS}'
+            os-cmake-args: '-DCMAKE_CXX_FLAGS="-flto" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc ${POSIX_CMAKE_ARGS}'
             build-args: ''
             extension: ''
             bindir: '/bin'
@@ -27,15 +27,15 @@ jobs:
             shacmd: 'shasum -a512'
           - os: windows
             runner: windows-latest
-            os-cmake-args: '-Thost=x64 -DLLVM_USE_CRT_MINSIZEREL="MT"'
-            build-args: '--config MinSizeRel'
+            os-cmake-args: '-Thost=x64 -DLLVM_USE_CRT_RELEASE="MT"'
+            build-args: '--config Release'
             extension: '.exe'
-            bindir: '/MinSizeRel/bin'
+            bindir: '/Release/bin'
             shacmd: 'sha512sum.exe'
     runs-on: ${{ matrix.runner }}
     env:
       COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
-      POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=MinSizeRel'
+      POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'
       LLVM_VERSION: '18.1.4'
     steps:
     - name: Checkout
@@ -44,13 +44,6 @@ jobs:
     - name: Checkout LLVM repo
       run: |
           git clone -b "llvmorg-${{ env.LLVM_VERSION }}" --depth=1 https://github.com/llvm/llvm-project "llvm"
-
-    - name: Install Clang 18
-      if: ${{ matrix.os == 'linux' }}
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x ./llvm.sh
-        sudo ./llvm.sh 18
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
