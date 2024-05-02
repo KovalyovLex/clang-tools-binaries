@@ -14,12 +14,10 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const my_repo = context.repo();
-
             // Load release list from GitHub
             let releaseList = await github.rest.repos.listReleases({
-                repo: my_repo.repo,
-                owner: my_repo.owner,
+                repo: context.repo.repo,
+                owner: context.repo.owner,
                 per_page: 100,
                 page: 1
             });
@@ -119,14 +117,12 @@ jobs:
               }
             }
 
-            const my_repo = context.repo();
-
             for(const version of versions_to_trigger) {
               console.log(`Triggering build action for version: ${version}`);
 
               await github.rest.actions.createWorkflowDispatch({
-                owner: my_repo.owner,
-                repo: my_repo.repo,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 workflow_id: 'build_binaries.yaml',
                 version_to_build: version
               });
