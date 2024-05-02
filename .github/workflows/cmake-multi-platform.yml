@@ -58,7 +58,6 @@ jobs:
       shell: bash
       run: |
         mkdir ${{ steps.strings.outputs.artifacts-dir }}
-        mkdir ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -71,17 +70,18 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-format
     
     - name: Build (clang-tidy)
+      if: false
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ matrix.build-args }} --target clang-tidy
 
     - name: Copy binaries
       working-directory: ${{ steps.strings.outputs.bin-dir }}
       shell: bash
       run: |
-        cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
-        cp ./clang-tidy${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
+        cp ./clang-format${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
+        # cp ./clang-tidy${{ matrix.extension }} ${{ steps.strings.outputs.artifacts-dir }}
 
     - name: Create and print sha512sum (clang-format)
-      working-directory: ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
       shell: bash
       run: |
         ${{ matrix.shacmd }} clang-format${{ matrix.extension }} > clang-format${{ matrix.extension }}.sha512sum
@@ -89,7 +89,8 @@ jobs:
         cat clang-format${{ matrix.extension }}.sha512sum
     
     - name: Create and print sha512sum (clang-tidy)
-      working-directory: ${{ steps.strings.outputs.artifacts-dir }}/${{ matrix.os }}
+      if: false
+      working-directory: ${{ steps.strings.outputs.artifacts-dir }}
       shell: bash
       run: |
         ${{ matrix.shacmd }} clang-tidy${{ matrix.extension }} > clang-tidy${{ matrix.extension }}.sha512sum
@@ -99,8 +100,8 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: clang-tools
-        path: "${{ steps.strings.outputs.artifacts-dir }}"
+        name: clang-tools-${{ matrix.os }}
+        path: "${{ steps.strings.outputs.artifacts-dir }}/"
         retention-days: 1
         
   draft-release:
@@ -113,7 +114,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: clang-tools
+          merge-multiple: 'false'
 
       - name: List Files
         run: ls -laR .
