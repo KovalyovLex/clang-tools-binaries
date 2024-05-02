@@ -1,7 +1,7 @@
 name: Build binaries
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       version_to_build:
         required: true
