@@ -79,7 +79,16 @@ jobs:
               }
             };
 
-            await exec.exec('git', ['--tags', '--refs', '--sort=-version:refname', 'https://github.com/llvm/llvm-project', 'llvmorg-*'], options);
+            await exec.exec('git', ['ls-remote', '--tags', '--refs', '--sort=-version:refname', 'https://github.com/llvm/llvm-project', 'llvmorg-*'], options);
+
+            for(const version in versions_to_trigger) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: 'KovalyovLex',
+                repo: 'clang-tools-binaries',
+                workflow_id: 'build_binaries.yaml',
+                version-to-build: version
+              });
+            }
 
 
         
