@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  LLVM_VERSION: '18.1.4'
+
 jobs:
   build:
     strategy:
@@ -36,7 +39,6 @@ jobs:
     env:
       COMMON_CMAKE_ARGS: '-DBUILD_SHARED_LIBS=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"'
       POSIX_CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'
-      LLVM_VERSION: '18.1.4'
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -124,7 +126,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "clang-*"
+          file: "*"
+          default_release_name: ${{ env.LLVM_VERSION }}
           draft: true
+          overwrite: true
 
         
