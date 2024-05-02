@@ -81,8 +81,8 @@ jobs:
 
             for(const version in versions_to_trigger) {
               await github.rest.actions.createWorkflowDispatch({
-                owner: 'octocat',
-                repo: 'pipelines',
+                owner: 'KovalyovLex',
+                repo: 'clang-tools-binaries',
                 workflow_id: 'build_binaries.yaml',
                 version-to-build: version
               })

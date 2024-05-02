@@ -153,14 +153,17 @@ jobs:
       - name: List files after zip
         run: ls -laR .
 
-      - name: Make draft release
+      - name: Make release
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: "*.zip"
+          tag_name: ${{ inputs.version-to-build }}
           default_release_name: ${{ inputs.version-to-build }}
           draft: false
           overwrite: true
+          default_release_body: |
+            Clang tools (clang-format, clang-tidy) of version: ${{ inputs.version-to-build }}
 
         
