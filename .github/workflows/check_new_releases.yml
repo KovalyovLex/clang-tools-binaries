@@ -33,28 +33,28 @@ jobs:
             }
             
             // Load release list from GitHub
-            let releaseList = await github.rest.repos.listReleases({
-                repo: context.repo.repo,
-                owner: context.repo.owner,
-                per_page: 100,
-                page: 1
+            const releaseList = await github.rest.repos.listReleases({
+              repo: context.repo.repo,
+              owner: context.repo.owner,
+              per_page: 100,
+              page: 1
             });
 
             let topmostRelease = null;
 
             for(const releaseElement of releaseList.data) {
-                if (!releaseElement.draft && !releaseElement.prerelease && /^[0-9.]+$/.test(releaseElement.name)) {
-                    if (!topmostRelease || compareVersions(releaseElement.name, topmostRelease.name) > 0) {
-                      topmostRelease = releaseElement;
-                    }
+              if (/^[0-9.]+$/.test(releaseElement.name) && !releaseElement.draft && !releaseElement.prerelease) {
+                if (!topmostRelease || compareVersions(releaseElement.name, topmostRelease.name) > 0) {
+                  topmostRelease = releaseElement;
                 }
+              }
             }
 
             if (topmostRelease) {
-              for (var prop in releaseElement) {
-                  if (Object.prototype.hasOwnProperty.call(releaseElement, prop)) {
-                    # console.log(`Release ${prop}: ${releaseElement[prop]}`);
-                  }
+              for (var prop in topmostRelease) {
+                if (Object.prototype.hasOwnProperty.call(topmostRelease, prop)) {
+                  console.log(`Release ${prop}: ${topmostRelease[prop]}`);
+                }
               }
 
               core.setOutput('id', topmostRelease.id);
