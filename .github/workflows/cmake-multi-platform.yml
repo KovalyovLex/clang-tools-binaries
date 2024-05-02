@@ -105,30 +105,15 @@ jobs:
         name: clang-tools-${{ matrix.os }}
         path: "${{ steps.strings.outputs.artifacts-dir }}/"
         retention-days: 1
-        
-  draft-release:
-    runs-on: ubuntu-latest
-    needs: build
-    if: |
-      always() && 
-      needs.build.result == 'success'
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          merge-multiple: 'false'
-
-      - name: List Files
-        run: ls -laR .
-
-      - name: Make Draft Release
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          file: "*"
-          default_release_name: ${{ env.LLVM_VERSION }}
-          draft: true
-          overwrite: true
+    
+    - name: Upload to draft release
+      uses: xresloader/upload-to-github-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        file: "${{ steps.strings.outputs.artifacts-dir }}/*"
+        default_release_name: ${{ env.LLVM_VERSION }}
+        draft: true
+        overwrite: true
 
         
