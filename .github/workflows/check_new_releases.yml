@@ -27,6 +27,12 @@ jobs:
 
                 console.log(`Release: ${releaseListElement}`);
 
+                for (var prop in releaseListElement) {
+                    if (Object.prototype.hasOwnProperty.call(releaseListElement, prop)) {
+                      console.log(`Release ${prop}: ${releaseListElement[prop]}`);
+                    }
+                }
+
                 if (!releaseListElement.draft && !releaseListElement.prerelease) {
                     console.log(`Chosen: ${releaseListElement.id}`);
                     core.setOutput('name', releaseListElement.name);
