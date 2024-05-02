@@ -27,7 +27,10 @@ jobs:
           script: |
             const { execute } = require('child_process');
 
-            latest_version="${{ steps.last_release.outputs.name }}";
+            var latest_version="${{ steps.last_release.outputs.name }}";
+            if (latest_version === "") {
+              latest_version = "18.1.0";
+            }
 
             // Function to compare two version strings
             function compareVersions(a, b) {
@@ -45,7 +48,7 @@ jobs:
               return 0;
             }
 
-            versions_to_trigger = [];
+            var versions_to_trigger = [];
 
             execute('git ls-remote --tags --refs --sort=-version:refname https://github.com/llvm/llvm-project llvmorg-*', (error, stdout, stderr) => {
               if (error) {
@@ -85,7 +88,7 @@ jobs:
                 repo: 'clang-tools-binaries',
                 workflow_id: 'build_binaries.yaml',
                 version-to-build: version
-              })
+              });
             }
 
       - name: Check LLVM versions Bash
