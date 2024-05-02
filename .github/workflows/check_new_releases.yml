@@ -86,7 +86,7 @@ jobs:
                 owner: 'KovalyovLex',
                 repo: 'clang-tools-binaries',
                 workflow_id: 'build_binaries.yaml',
-                version-to-build: version
+                version_to_build: version
               });
             }
 
