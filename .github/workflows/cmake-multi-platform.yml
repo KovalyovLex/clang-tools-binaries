@@ -102,18 +102,67 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: clang-tools-${{ matrix.os }}
+        name: ${{ matrix.os }}
         path: "${{ steps.strings.outputs.artifacts-dir }}/"
         retention-days: 1
-    
-    - name: Upload to draft release
-      uses: xresloader/upload-to-github-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        file: "${{ steps.strings.outputs.artifacts-dir }}/*"
-        default_release_name: ${{ env.LLVM_VERSION }}
-        draft: true
-        overwrite: true
+        
+  draft-release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      always() && 
+      needs.build.result == 'success'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: 'false'
+
+      - name: List files
+        run: ls -laR .
+      
+      - name: Zip artifacts
+        shell: bash  
+        run: |
+          # iterate through folders for each platform
+          for d in */ ; do
+              dirname="${d%"${d##*[!/]}"}" # extglob-free multi-trailing-/ trim
+              dirname="${dirname##*/}"     # remove everything before the last /
+              dirname=${dirname:-/}        # correct for dirname=/ case
+          
+              # iterate through files and make archieve for every file in folder
+              for f in $d* ; do
+                  full_filename="${f%"${f##*[!/]}"}"   # extglob-free multi-trailing-/ trim
+                  full_filename="${full_filename##*/}" # remove everything before the last /
+                  full_filename=${full_filename:-/}    # correct for dirname=/ case
+                  extension="${full_filename##*.}"     # Extract extension
+                  
+                  # Check if the file has an extension
+                  if [ "$extension" != "$full_filename" ]; then
+                      filename="${full_filename%.*}"
+                      new_file_name="${filename}-${dirname}.${extension}"
+                  else
+                      new_file_name="${full_filename}-${dirname}"
+                  fi
+          
+                  zip -m $new_file_name.zip ./$f
+          
+                  echo "./$f, $new_file_name"
+              done
+              rm -rf $d # remove folder
+          done
+      
+      - name: List files after zip
+        run: ls -laR .
+
+      - name: Make draft release
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.zip"
+          default_release_name: ${{ env.LLVM_VERSION }}
+          draft: true
+          overwrite: true
 
         
