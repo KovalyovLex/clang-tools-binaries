@@ -1,0 +1,113 @@
+name: Check new releases
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: My last release
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.0.1
+        with:
+          myToken: ${{ github.token }}
+          exclude_types: "draft|prerelease"
+          view_top: 1
+      - name: "Print result"
+        run: |
+          echo "id: ${{ steps.last_release.outputs.id }}"
+          echo "name: ${{ steps.last_release.outputs.name }}"
+          echo "tag_name: ${{ steps.last_release.outputs.tag_name }}"
+      - name: Check LLVM versions
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { exec } = require('child_process');
+
+            latest_version="${{ steps.last_release.outputs.name }}";
+
+            // Function to compare two version strings
+            function compareVersions(a, b) {
+              const partsA = a.split('.');
+              const partsB = b.split('.');
+              const maxLength = Math.max(partsA.length, partsB.length);
+
+              for (let i = 0; i < maxLength; i++) {
+                const numA = parseInt(partsA[i]) || 0;
+                const numB = parseInt(partsB[i]) || 0;
+                if (numA !== numB) {
+                  return numA - numB;
+                }
+              }
+              return 0;
+            }
+
+            exec('git ls-remote --tags --refs --sort=-version:refname https://github.com/llvm/llvm-project llvmorg-*', (error, stdout, stderr) => {
+              if (error) {
+                console.error(`Error: ${error.message}`);
+                return;
+              }
+              if (stderr) {
+                console.error(`stderr: ${stderr}`);
+                return;
+              }
+            
+              // Split the output into an array of lines
+              const lines = stdout.trim().split('\n');
+            
+              lines.forEach(line => {
+                // Split the line into oid and ref
+                const [oid, ref] = line.split('\t');
+            
+                // Remove prefix from ref
+                const version = ref.replace('refs/tags/llvmorg-', '');
+            
+                // Check if version consists only of numbers and dots
+                if (/^[0-9.]+$/.test(version)) {
+                  // Compare versions
+                  if (compareVersions(version, latest_version) > 0) {
+                    console.log(version + " is greater, need to build binaries");
+
+                    await github.rest.actions.createWorkflowDispatch({
+                      owner: 'octocat',
+                      repo: 'pipelines',
+                      workflow_id: 'build_binaries.yaml',
+                      version-to-build: version
+                    })
+                  }
+                }
+              });
+            });
+
+      - name: Check LLVM versions Bash
+        run: |
+          latest_version=${{ steps.last_release.outputs.name }}
+          echo "Latest release version: $latest_version"
+
+          output=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/llvm/llvm-project llvmorg-*)
+
+          # Loop through each line of the output
+          while IFS= read -r line; do
+              # Extract oid and ref from each line (modify according to your actual output format)
+              oid_ref=($line)
+              oid="${oid_ref[0]}"
+              ref="${oid_ref[1]}"
+          
+              # Remove prefix from ref
+              version=$(echo "$ref" | sed 's/refs\/tags\/llvmorg-//')
+          
+              # Filter versions with characters other than numbers or dots
+              if echo "$version" | grep -qE '^[0-9.]+$'; then
+                if { echo "$version"; echo "$latest_version"; } | sort --version-sort --check; then
+                    # echo "$version is equal or less"
+                else
+                    echo "$version is greater, need to build binaries"
+                fi
+              fi
+          done <<< "$output"
+
+
+        

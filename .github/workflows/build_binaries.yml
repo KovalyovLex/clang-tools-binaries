@@ -1,11 +1,11 @@
 name: Build binaries
 
 on:
-  push:
-    branches: [ "main" ]
-
-env:
-  LLVM_VERSION: '18.1.0'
+  workflow_call:
+    inputs:
+      version-to-build:
+        required: true
+        type: string
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
 
     - name: Checkout LLVM repo
       run: |
-          git clone -b "llvmorg-${{ env.LLVM_VERSION }}" --depth=1 https://github.com/llvm/llvm-project "llvm"
+          git clone -b "llvmorg-${{ inputs.version-to-build }}" --depth=1 https://github.com/llvm/llvm-project "llvm"
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -159,8 +159,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: "*.zip"
-          default_release_name: ${{ env.LLVM_VERSION }}
-          draft: true
+          default_release_name: ${{ inputs.version-to-build }}
+          draft: false
           overwrite: true
 
         
