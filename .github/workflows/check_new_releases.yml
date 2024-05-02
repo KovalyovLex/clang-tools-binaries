@@ -14,10 +14,8 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const octokit = github.getOctokit();
-
             // Load release list from GitHub
-            let releaseList = await octokit.rest.repos.listReleases({
+            let releaseList = await github.rest.repos.listReleases({
                 repo: github.context.repo.repo,
                 owner: github.context.repo.owner,
                 per_page: 100,
