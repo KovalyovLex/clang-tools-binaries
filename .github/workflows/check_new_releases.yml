@@ -50,40 +50,12 @@ jobs:
 
             let versions_to_trigger = [];
 
+            let output = "";
+
             const options = {};
             options.listeners = {
               stdout: (data) => {
-                // Split the output into an array of lines
-                const lines = data.toString().split('\n');
-              
-                console.log(`lines: ${lines}`);
-                console.log(`------- end lines --------`);
-
-                for(const line in lines) {
-                  // Split the line into oid and ref
-                  const [oid, ref] = line.split('\t');
-
-                  console.log(`line: ${line}`);
-
-                  if (!oid || !ref) {
-                    continue;
-                  }
-
-                  console.log(`oid: ${oid}, ref: ${ref}`);
-
-                  // Remove prefix from ref
-                  const version = ref.replace('refs/tags/llvmorg-', '');
-              
-                  // Check if version consists only of numbers and dots
-                  if (/^[0-9.]+$/.test(version)) {
-                    // Compare versions
-                    if (compareVersions(version, latest_version) > 0) {
-                      console.log(`${version} is greater, need to build binaries`);
-
-                      versions_to_trigger.push(version)
-                    }
-                  }
-                }
+                output += data.toString();
               },
               stderr: (data) => {
                 console.error(`stderr: ${data.toString()}`);
@@ -91,6 +63,38 @@ jobs:
             };
 
             await exec.exec('git', ['ls-remote', '--tags', '--refs', '--sort=-version:refname', 'https://github.com/llvm/llvm-project', 'llvmorg-*'], options);
+
+            // Split the output into an array of lines
+            const lines = output.split('\n');
+          
+            console.log(`lines: ${lines}`);
+            console.log(`------- end lines --------`);
+
+            for(const line in lines) {
+              // Split the line into oid and ref
+              const [oid, ref] = line.split('\t');
+
+              console.log(`line: ${line}`);
+
+              if (!oid || !ref) {
+                continue;
+              }
+
+              console.log(`oid: ${oid}, ref: ${ref}`);
+
+              // Remove prefix from ref
+              const version = ref.replace('refs/tags/llvmorg-', '');
+          
+              // Check if version consists only of numbers and dots
+              if (/^[0-9.]+$/.test(version)) {
+                // Compare versions
+                if (compareVersions(version, latest_version) > 0) {
+                  console.log(`${version} is greater, need to build binaries`);
+
+                  versions_to_trigger.push(version)
+                }
+              }
+            }
 
             for(const version in versions_to_trigger) {
               console.log(`Triggering build action for version: ${version}`);
