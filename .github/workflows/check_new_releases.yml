@@ -50,37 +50,36 @@ jobs:
 
             var versions_to_trigger = [];
 
-            execute('git ls-remote --tags --refs --sort=-version:refname https://github.com/llvm/llvm-project llvmorg-*', (error, stdout, stderr) => {
-              if (error) {
-                console.error(`Error: ${error.message}`);
-                return;
-              }
-              if (stderr) {
-                console.error(`stderr: ${stderr}`);
-                return;
-              }
-            
-              // Split the output into an array of lines
-              const lines = stdout.trim().split('\n');
-            
-              for(const line in lines) {
-                // Split the line into oid and ref
-                const [oid, ref] = line.split('\t');
-            
-                // Remove prefix from ref
-                const version = ref.replace('refs/tags/llvmorg-', '');
-            
-                // Check if version consists only of numbers and dots
-                if (/^[0-9.]+$/.test(version)) {
-                  // Compare versions
-                  if (compareVersions(version, latest_version) > 0) {
-                    console.log(version + " is greater, need to build binaries");
+            const options = {};
+            options.listeners = {
+              stdout: (data: Buffer) => {
+                // Split the output into an array of lines
+                const lines = data.toString().trim().split('\n');
+              
+                for(const line in lines) {
+                  // Split the line into oid and ref
+                  const [oid, ref] = line.split('\t');
+              
+                  // Remove prefix from ref
+                  const version = ref.replace('refs/tags/llvmorg-', '');
+              
+                  // Check if version consists only of numbers and dots
+                  if (/^[0-9.]+$/.test(version)) {
+                    // Compare versions
+                    if (compareVersions(version, latest_version) > 0) {
+                      console.log(version + " is greater, need to build binaries");
 
-                    versions_to_trigger.push(version)
+                      versions_to_trigger.push(version)
+                    }
                   }
                 }
+              },
+              stderr: (data: Buffer) => {
+                console.error(`stderr: ${data.toString()}`);
               }
-            });
+            };
+
+            await exec.exec('git', ['--tags', '--refs', '--sort=-version:refname', 'https://github.com/llvm/llvm-project', 'llvmorg-*'], options);
 
 
         
