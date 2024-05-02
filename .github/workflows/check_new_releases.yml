@@ -60,6 +60,8 @@ jobs:
                   // Split the line into oid and ref
                   const [oid, ref] = line.split('\t');
               
+                  console.log(`oid: ${oid}, ref: ${ref}, line: ${line}`);
+
                   // Remove prefix from ref
                   const version = ref.replace('refs/tags/llvmorg-', '');
               
