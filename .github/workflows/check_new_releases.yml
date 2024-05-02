@@ -25,10 +25,10 @@ jobs:
             for (let i = 0; i < releaseList.data.length; i++) {
                 let releaseListElement = releaseList.data[i];
 
-                core.debug(`Release: ${releaseListElement}`);
+                console.log(`Release: ${releaseListElement}`);
 
                 if (!releaseListElement.draft && !releaseListElement.prerelease) {
-                    core.debug(`Chosen: ${releaseListElement.id}`);
+                    console.log(`Chosen: ${releaseListElement.id}`);
                     core.setOutput('name', releaseListElement.name);
                     break;
                 }
