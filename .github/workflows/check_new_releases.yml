@@ -16,6 +16,22 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
+            // Function to compare two version strings
+            function compareVersions(a, b) {
+              const partsA = a.split('.');
+              const partsB = b.split('.');
+              const maxLength = Math.max(partsA.length, partsB.length);
+
+              for (let i = 0; i < maxLength; i++) {
+                const numA = parseInt(partsA[i]) || 0;
+                const numB = parseInt(partsB[i]) || 0;
+                if (numA !== numB) {
+                  return numA - numB;
+                }
+              }
+              return 0;
+            }
+            
             // Load release list from GitHub
             let releaseList = await github.rest.repos.listReleases({
                 repo: context.repo.repo,
@@ -24,21 +40,25 @@ jobs:
                 page: 1
             });
 
-            for (let i = 0; i < releaseList.data.length; i++) {
-                let releaseListElement = releaseList.data[i];
+            let topmostRelease = null;
 
-                for (var prop in releaseListElement) {
-                    if (Object.prototype.hasOwnProperty.call(releaseListElement, prop)) {
-                      console.log(`Release ${prop}: ${releaseListElement[prop]}`);
+            for(const releaseElement of releaseList.data) {
+                if (!releaseElement.draft && !releaseElement.prerelease && /^[0-9.]+$/.test(releaseElement.name)) {
+                    if (!topmostRelease || compareVersions(releaseElement.name, topmostRelease.name) > 0) {
+                      topmostRelease = releaseElement;
                     }
                 }
+            }
 
-                if (!releaseListElement.draft && !releaseListElement.prerelease) {
-                    console.log(`Chosen: ${releaseListElement.id}`);
-                    core.setOutput('name', releaseListElement.name);
-                    core.setOutput('id', releaseListElement.id);
-                    break;
-                }
+            if (topmostRelease) {
+              for (var prop in releaseElement) {
+                  if (Object.prototype.hasOwnProperty.call(releaseElement, prop)) {
+                    # console.log(`Release ${prop}: ${releaseElement[prop]}`);
+                  }
+              }
+
+              core.setOutput('id', topmostRelease.id);
+              core.setOutput('name', topmostRelease.name);
             }
 
       - name: "Print result"

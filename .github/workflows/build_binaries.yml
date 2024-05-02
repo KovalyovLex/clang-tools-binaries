@@ -153,7 +153,20 @@ jobs:
       - name: List files after zip
         run: ls -laR .
 
-      - name: Make release
+      - name: Create celease
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ inputs.version_to_build }}
+          release_name: ${{ inputs.version_to_build }}
+          body: |
+            Clang tools (clang-format, clang-tidy) of version: ${{ inputs.version_to_build }}
+          draft: false
+          prerelease: true
+
+      - name: Upload files to release
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -162,8 +175,7 @@ jobs:
           tag_name: ${{ inputs.version_to_build }}
           default_release_name: ${{ inputs.version_to_build }}
           draft: false
+          prerelease: false
           overwrite: true
-          default_release_body: |
-            Clang tools (clang-format, clang-tidy) of version: ${{ inputs.version_to_build }}
 
         
