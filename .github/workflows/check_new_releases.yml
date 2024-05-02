@@ -14,12 +14,14 @@ jobs:
         with:
           myToken: ${{ github.token }}
           exclude_types: "draft|prerelease"
-          view_top: 1
+          view_top: 10
+
       - name: "Print result"
         run: |
           echo "id: ${{ steps.last_release.outputs.id }}"
           echo "name: ${{ steps.last_release.outputs.name }}"
           echo "tag_name: ${{ steps.last_release.outputs.tag_name }}"
+
       - name: Check LLVM versions
         uses: actions/github-script@v7
         with:
@@ -50,7 +52,7 @@ jobs:
 
             const options = {};
             options.listeners = {
-              stdout: (data: Buffer) => {
+              stdout: (data) => {
                 // Split the output into an array of lines
                 const lines = data.toString().trim().split('\n');
               
@@ -72,7 +74,7 @@ jobs:
                   }
                 }
               },
-              stderr: (data: Buffer) => {
+              stderr: (data) => {
                 console.error(`stderr: ${data.toString()}`);
               }
             };
