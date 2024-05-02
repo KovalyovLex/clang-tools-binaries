@@ -67,14 +67,9 @@ jobs:
             // Split the output into an array of lines
             const lines = output.split('\n');
           
-            console.log(`lines: ${lines}`);
-            console.log(`------- end lines --------`);
-
             for(const line of lines) {
               // Split the line into oid and ref
               const [oid, ref] = line.split('\t');
-
-              console.log(`line: ${line}`);
 
               if (!oid || !ref) {
                 continue;
@@ -92,6 +87,8 @@ jobs:
                   console.log(`${version} is greater, need to build binaries`);
 
                   versions_to_trigger.push(version)
+                } else {
+                  console.log(`${version} is smaller than our release`);
                 }
               }
             }
