@@ -54,8 +54,10 @@ jobs:
             options.listeners = {
               stdout: (data) => {
                 // Split the output into an array of lines
-                const lines = data.toString().trim().split('\n');
+                const lines = data.toString().split('\n');
               
+                console.log(`lines: ${lines}`);
+
                 for(const line in lines) {
                   // Split the line into oid and ref
                   const [oid, ref] = line.split('\t');
