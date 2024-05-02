@@ -8,6 +8,34 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Latest Release
+        id: get_release
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const octokit = github.getOctokit();
+
+            // Load release list from GitHub
+            let releaseList = await octokit.rest.repos.listReleases({
+                repo: github.context.repo.repo,
+                owner: github.context.repo.owner,
+                per_page: 100,
+                page: 1
+            });
+
+            for (let i = 0; i < releaseList.data.length; i++) {
+                let releaseListElement = releaseList.data[i];
+
+                core.debug(`Release: ${releaseListElement}`);
+
+                if (!releaseListElement.draft && !releaseListElement.prerelease) {
+                    core.debug(`Chosen: ${releaseListElement.id}`);
+                    core.setOutput('name', releaseListElement.name);
+                    break;
+                }
+            }
+
       - name: My last release
         id: last_release
         uses: InsonusK/get-latest-release@v1.1.0
@@ -75,8 +103,6 @@ jobs:
                 continue;
               }
 
-              console.log(`oid: ${oid}, ref: ${ref}`);
-
               // Remove prefix from ref
               const version = ref.replace('refs/tags/llvmorg-', '');
           
@@ -88,7 +114,7 @@ jobs:
 
                   versions_to_trigger.push(version)
                 } else {
-                  console.log(`${version} is smaller than our release`);
+                  console.log(`${version} is smaller than our release. No need to trigger build`);
                 }
               }
             }
