@@ -45,6 +45,8 @@ jobs:
               return 0;
             }
 
+            versions_to_trigger = [];
+
             execute('git ls-remote --tags --refs --sort=-version:refname https://github.com/llvm/llvm-project llvmorg-*', (error, stdout, stderr) => {
               if (error) {
                 console.error(`Error: ${error.message}`);
@@ -71,16 +73,20 @@ jobs:
                   if (compareVersions(version, latest_version) > 0) {
                     console.log(version + " is greater, need to build binaries");
 
-                    await github.rest.actions.createWorkflowDispatch({
-                      owner: 'octocat',
-                      repo: 'pipelines',
-                      workflow_id: 'build_binaries.yaml',
-                      version-to-build: version
-                    })
+                    versions_to_trigger.push(version)
                   }
                 }
               });
             });
+
+            for(const version in versions_to_trigger) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: 'octocat',
+                repo: 'pipelines',
+                workflow_id: 'build_binaries.yaml',
+                version-to-build: version
+              })
+            }
 
       - name: Check LLVM versions Bash
         run: |
